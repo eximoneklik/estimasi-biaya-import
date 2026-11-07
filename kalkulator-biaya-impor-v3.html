@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Estimasi Bea dan Pajak Impor</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;800&display=swap">
+<style>
+:root{--bg:#f2f5f7;--card:#fff;--ink:#14263a;--mute:#5b6b7b;--line:#d9e1e8;--brand:#0f766e;--onbrand:#fff;--warn:#fef3c7;--warnink:#78350f;--err:#b91c1c;color-scheme:light;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1a26;--card:#16273a;--ink:#e8eef4;--mute:#9db0c2;--line:#2a3f55;--brand:#2dd4bf;--onbrand:#06231f;--warn:#3b2f12;--warnink:#fde68a;--err:#fca5a5;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1a26;--card:#16273a;--ink:#e8eef4;--mute:#9db0c2;--line:#2a3f55;--brand:#2dd4bf;--onbrand:#06231f;--warn:#3b2f12;--warnink:#fde68a;--err:#fca5a5;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.5 "Public Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:560px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:22px;margin:0 0 12px;font-weight:800}
+h2{font-size:20px;line-height:1.25;margin:0 0 14px;font-weight:800}
+.prog{height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.prog i{display:block;height:100%;background:var(--brand);width:0;transition:width .25s}
+.stl{color:var(--mute);font-size:13px;margin:6px 0 16px}
+.s{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}
+label{display:block;font-size:13px;color:var(--mute);margin:0 0 4px}
+input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;min-height:46px}
+textarea{font-size:13px;min-height:190px}
+input:focus,select:focus,textarea:focus,summary:focus-visible{outline:2px solid var(--brand);outline-offset:1px}
+.f{margin-bottom:14px}
+.hint{font-size:12.5px;color:var(--mute);margin:5px 0 0}
+a{color:var(--brand)}
+.err{color:var(--err);font-size:13px;min-height:18px;margin:0 0 8px}
+.nav{display:flex;gap:10px}
+.btn{flex:1;min-height:48px;border:0;border-radius:10px;background:var(--brand);color:var(--onbrand);font:600 16px "Public Sans",system-ui,sans-serif;cursor:pointer}
+.btn.o{background:transparent;color:var(--ink);border:1px solid var(--line);flex:0 0 36%}
+.btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.big{background:var(--ink);color:var(--bg);border-radius:12px;padding:16px;margin-bottom:14px}
+.big small{display:block;opacity:.75}
+.big b{font-size:30px;font-weight:800;line-height:1.2;word-break:break-word}
+.leg{list-style:none;margin:0 0 12px;padding:0}
+.leg li{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:14px}
+.leg li:first-child{border-top:0}
+.leg li span:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.leg li.m{color:var(--mute)}
+.warn{background:var(--warn);color:var(--warnink);border-radius:10px;padding:12px;font-size:13.5px;margin:0 0 12px}
+.cta{border:1px solid var(--brand);border-radius:10px;padding:12px;font-size:14px;margin:0 0 12px}
+.chk{display:flex;gap:10px;align-items:flex-start;margin:0 0 12px;color:var(--ink);font-size:14px}
+.chk input{width:20px;min-height:20px;margin-top:2px;flex:none}
+details{margin:6px 0 4px}
+summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:600;color:var(--brand)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.note{font-size:12px;color:var(--mute);margin-top:18px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+<h1>Estimasi bea dan pajak impor</h1>
+<div class="prog" aria-hidden="true"><i id="pbar"></i></div>
+<p class="stl" id="stl"></p>
+
+<section class="s" data-s="1">
+<h2>Barang apa yang mau diimpor?</h2>
+<div class="f"><label for="barang">Nama barang</label><input id="barang" type="text" placeholder="Contoh: suku cadang mesin"></div>
+<div class="f"><label for="hs">HS Code (kode barang)</label><input id="hs" type="text" inputmode="decimal" placeholder="Contoh: 8483.40.00"><p class="hint">HS Code menentukan tarif bea masuk dan apakah barang kena larangan/pembatasan (Lartas). Belum tahu? Cari di <a href="https://insw.go.id" target="_blank" rel="noopener">INSW</a> atau tanya forwarder.</p></div>
+<div class="f"><label for="bm">Tarif bea masuk untuk HS Code ini (%)</label><input id="bm" type="number" inputmode="decimal" placeholder="Contoh: 5"><p class="hint">Ambil dari INSW. Kalau punya Form E/COO, tarifnya bisa lebih rendah. Kosong dihitung 0%.</p></div>
+</section>
+
+<section class="s" data-s="2" hidden>
+<h2>Berapa nilai barangnya (harga FOB)?</h2>
+<div class="g2">
+<div class="f"><label for="nilai">Nilai barang di invoice</label><input id="nilai" type="number" inputmode="decimal"></div>
+<div class="f"><label for="cur">Mata uang</label><select id="cur"><option>USD</option><option>CNY</option><option>EUR</option><option>SGD</option><option>JPY</option><option>Lainnya</option></select></div>
+</div>
+<div class="f"><label for="kurs">Kurs pajak (Rp per 1 <span id="curl">USD</span>)</label><input id="kurs" type="number" inputmode="decimal"><p class="hint">Pakai kurs pajak (NDPBM) resmi dari Kementerian Keuangan yang berlaku saat impor.</p></div>
+</section>
+
+<section class="s" data-s="3" hidden>
+<h2>Dari mana ke mana?</h2>
+<div class="f"><label for="neg">Negara asal barang</label><select id="neg"><option>China</option><option>Singapura</option><option>Jepang</option><option>Korea Selatan</option><option>Thailand</option><option>Vietnam</option><option>Malaysia</option><option>India</option><option>Jerman</option><option>Amerika Serikat</option><option>Lainnya</option></select></div>
+<div class="f"><label for="port">Pelabuhan/bandara tujuan</label><select id="port"><option>Tanjung Priok (Jakarta)</option><option>Tanjung Perak (Surabaya)</option><option>Tanjung Emas (Semarang)</option><option>Belawan (Medan)</option><option>Makassar</option><option>Soekarno-Hatta (Jakarta, udara)</option><option>Juanda (Surabaya, udara)</option><option>Lainnya</option></select></div>
+</section>
+
+<section class="s" data-s="4" hidden>
+<h2>Berapa banyak dan dikirim bagaimana?</h2>
+<div class="f"><label for="moda">Jenis pengiriman</label><select id="moda"><option>Container 20 ft (FCL)</option><option>Container 40 ft (FCL)</option><option>LCL (gabung container)</option><option>Udara</option></select></div>
+<div class="f"><label for="vol" id="voll">Jumlah container</label><input id="vol" type="number" inputmode="decimal" value="1"></div>
+<div class="f"><label for="qty">Jumlah unit barang</label><input id="qty" type="number" inputmode="decimal"></div>
+</section>
+
+<section class="s" data-s="5" hidden>
+<h2>Estimasi bea dan pajak impor</h2>
+<div class="big"><small>Estimasi total bea masuk dan pajak (dari nilai FOB)</small><b id="tpajak">-</b></div>
+<p class="warn"><b>Ini hanya estimasi, belum termasuk ongkir dan asuransi.</b> Angka dihitung dari nilai FOB dengan tarif yang Anda isi sendiri. Dasar pajak impor sebenarnya adalah nilai CIF (barang + ongkir + asuransi), jadi bea dan pajak yang harus dibayar akan lebih tinggi.</p>
+<div id="w5"></div>
+<ul class="leg" id="l5"></ul>
+<p class="cta">Mau tahu biaya ongkirnya? Isi detail pengiriman di langkah berikutnya. Forwarder rekanan akan mengirim penawaran lewat WhatsApp.</p>
+<details><summary>Ubah asumsi pajak</summary>
+<div class="g2">
+<div class="f"><label for="ppn">PPN (%)</label><input id="ppn" type="number" inputmode="decimal" value="11"></div>
+<div class="f"><label for="pph">PPh 22 impor</label><select id="pph"><option value="2.5">2,5% (punya API)</option><option value="7.5">7,5% (tanpa API)</option><option value="10">10%</option></select></div>
+</div>
+<p class="hint">Untuk perusahaan PKP, PPN impor dan PPh 22 umumnya bisa dikreditkan. Tanyakan ke konsultan pajak Anda.</p>
+</details>
+</section>
+
+<section class="s" data-s="6" hidden>
+<h2>Minta penawaran ongkir</h2>
+<p class="hint" style="margin:-8px 0 12px">Lengkapi detail berikut. Data diteruskan ke forwarder rekanan lewat WhatsApp. Gratis untuk Anda.</p>
+<div class="f"><label for="inc">Incoterms dengan supplier</label><select id="inc"><option>EXW</option><option>FCA</option><option selected>FOB</option><option>CFR</option><option>CIF</option><option>CPT</option><option>CIP</option><option>DAP</option><option>DDP</option></select><p class="hint" id="incd"></p></div>
+<div class="g2">
+<div class="f"><label for="muat">Kota/pelabuhan muat</label><input id="muat" type="text" placeholder="Contoh: Shanghai"></div>
+<div class="f"><label for="jadwal">Rencana kirim</label><input id="jadwal" type="text" placeholder="Contoh: akhir bulan ini"></div>
+<div class="f"><label for="fnama">Nama</label><input id="fnama" type="text" autocomplete="name"></div>
+<div class="f"><label for="fkon">No. WhatsApp</label><input id="fkon" type="tel" inputmode="tel" autocomplete="tel"></div>
+</div>
+<div class="f"><label for="fout">Data yang akan dikirim</label><textarea id="fout" readonly></textarea></div>
+<label class="chk"><input id="fset" type="checkbox"><span>Saya setuju data ini diteruskan ke forwarder rekanan. Pengelola alat ini dapat menerima imbalan dari forwarder, dan itu tidak menambah biaya Anda.</span></label>
+</section>
+
+<p class="err" id="err" role="alert"></p>
+<div class="nav"><button class="btn o" id="back" type="button">Kembali</button><button class="btn" id="next" type="button">Lanjut</button></div>
+<p class="note">Semua angka di sini adalah estimasi. Alat bantu hitung, bukan nasihat pajak atau kepabeanan. Tarif dan aturan bisa berubah dan berbeda per barang. Verifikasi ke INSW, Bea Cukai, atau konsultan sebelum dipakai untuk keputusan.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const nf=new Intl.NumberFormat("id-ID",{maximumFractionDigits:0});
+const rp=n=>"Rp "+nf.format(Math.round(n));
+const v=id=>{const x=parseFloat($(id).value);return isFinite(x)?x:0};
+// Isi nomor WhatsApp penerima (format 62812xxxxxxx). Jika kosong, teks ditampilkan untuk disalin.
+const WA="6285337837395";
+const INC={EXW:"Anda menanggung semua biaya sejak dari gudang supplier.",FCA:"Supplier menyerahkan barang ke pengangkut yang Anda tunjuk.",FOB:"Supplier menanggung biaya sampai barang naik kapal. Ongkir dan asuransi Anda tanggung.",CFR:"Ongkir sudah termasuk di harga. Asuransi belum.",CIF:"Ongkir dan asuransi sudah termasuk di harga.",CPT:"Ongkir sampai tujuan sudah termasuk. Asuransi belum.",CIP:"Ongkir dan asuransi sudah termasuk di harga.",DAP:"Supplier mengirim sampai tujuan. Bea dan pajak impor Anda tanggung.",DDP:"Supplier menanggung hampir semuanya, termasuk bea dan pajak."};
+let cur=1;const N=6;
+const LBL=["","Lanjut","Lanjut","Lanjut","Lanjut","Cek biaya ongkir","Lanjut via WhatsApp"];
+function row(a,b,c){return "<li"+(c?" class=\""+c+"\"":"")+"><span>"+a+"</span><span>"+b+"</span></li>"}
+function calc(){
+  const pabean=v("nilai")*v("kurs"),bm=pabean*v("bm")/100,dpp=pabean+bm;
+  const ppn=dpp*v("ppn")/100,pph=dpp*parseFloat($("pph").value)/100;
+  return{pabean,bm,ppn,pph,tax:bm+ppn+pph};
+}
+function r5(){
+  const c=calc();
+  $("tpajak").textContent=rp(c.tax);
+  $("l5").innerHTML=row("Nilai barang (FOB)",rp(c.pabean),"m")+row("Bea masuk ("+v("bm")+"%)",rp(c.bm))+row("PPN ("+v("ppn")+"%)",rp(c.ppn))+row("PPh 22 ("+$("pph").value+"%)",rp(c.pph));
+  $("w5").innerHTML=$("bm").value===""?"<p class=\"warn\">Tarif bea masuk belum diisi, dihitung 0%.</p>":"";
+}
+function r6(){
+  const c=calc();
+  $("incd").textContent=INC[$("inc").value];
+  $("fout").value=["Permintaan penawaran ongkir","Barang: "+($("barang").value||"-"),"HS Code: "+($("hs").value||"-"),"Asal: "+$("neg").value+(($("muat").value)?" ("+$("muat").value+")":""),"Tujuan: "+$("port").value,"Pengiriman: "+$("moda").value+", "+($("vol").value||"-")+" ("+$("voll").textContent.toLowerCase()+")","Jumlah unit: "+($("qty").value||"-"),"Incoterms: "+$("inc").value,"Rencana kirim: "+($("jadwal").value||"-"),"Nilai barang: "+nf.format(v("nilai"))+" "+$("cur").value,"Estimasi bea dan pajak: "+rp(c.tax)+" (dari nilai FOB, belum termasuk ongkir)"].join("\n");
+}
+function vmoda(){
+  const m=$("moda").value;
+  $("voll").textContent=m.indexOf("Container")===0?"Jumlah container":m.indexOf("LCL")===0?"Volume (CBM)":"Berat (kg)";
+}
+function check(n){
+  if(n===1&&!$("barang").value.trim())return "Isi nama barang dulu.";
+  if(n===2&&(v("nilai")<=0||v("kurs")<=0))return "Isi nilai barang dan kurs pajak dulu.";
+  if(n===4&&(v("vol")<=0||v("qty")<=0))return "Isi jumlah pengiriman dan jumlah unit dulu.";
+  return "";
+}
+function show(n){
+  cur=n;
+  document.querySelectorAll(".s").forEach(s=>s.hidden=+s.dataset.s!==n);
+  $("pbar").style.width=(n/N*100)+"%";
+  $("stl").textContent="Langkah "+n+" dari "+N;
+  $("back").hidden=n===1;
+  $("next").textContent=LBL[n];
+  $("err").textContent="";
+  if(n===5)r5();
+  if(n===6)r6();
+  window.scrollTo(0,0);
+}
+function send(){
+  const nm=$("fnama").value.trim(),kt=$("fkon").value.trim();
+  if(!nm||!kt||!$("fset").checked){$("err").textContent="Isi nama, nomor WhatsApp, dan centang persetujuan dulu.";return}
+  const t=$("fout").value+"\nNama: "+nm+"\nWhatsApp: "+kt;
+  let w=null;
+  if(WA){try{w=window.open("https://wa.me/"+WA+"?text="+encodeURIComponent(t),"_blank")}catch(e){}}
+  if(w){$("err").textContent="WhatsApp dibuka. Tekan kirim di sana."}
+  else{$("fout").value=t;$("fout").select();$("err").textContent=WA?"WhatsApp tidak bisa dibuka. Salin teks di atas dan kirim manual.":"Nomor penerima belum dipasang. Salin teks di atas dan kirim manual."}
+}
+$("next").addEventListener("click",()=>{
+  if(cur===N){send();return}
+  const e=check(cur);if(e){$("err").textContent=e;return}
+  show(cur+1);
+});
+$("back").addEventListener("click",()=>show(cur-1));
+$("moda").addEventListener("input",vmoda);
+$("cur").addEventListener("input",()=>$("curl").textContent=$("cur").value);
+["ppn","pph"].forEach(id=>$(id).addEventListener("input",r5));
+["inc","muat","jadwal"].forEach(id=>$(id).addEventListener("input",r6));
+vmoda();show(1);
+</script>
+</body>
+</html>
